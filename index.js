@@ -9,6 +9,10 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+const hello = {
+  faysal: "hi",
+};
+
 /**=======================================
               mongodb
   ======================================*/
@@ -26,7 +30,10 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const serviceCollection = client.db("justicialower").collection("services");
-    const reviewCollection = client.db("justicialowerReview").collection("review");
+    const reviewCollection = client
+      .db("justicialower")
+      .collection("reviews");
+
     /**=======================================
                   Total service
       =======================================*/
@@ -57,18 +64,20 @@ async function run() {
       res.send(service);
     });
 
+    //=============================================================================================
+
     /**=======================================
                  post review api
       =======================================*/
     app.post("/review", async (req, res) => {
       const user = req.body;
       console.log(user);
-      const result = await reviewCollection.insertOne(user);
+      const result = await reviewCollection.insertOne(hello);
       res.send(result);
-      console.log(result)
+      console.log(result);
     });
 
-      /**=======================================
+    /**=======================================
                  get review api
       =======================================*/
 
@@ -79,7 +88,33 @@ async function run() {
       res.send(user);
     });
 
-    } finally {
+    // orders api
+    app.get("/orders", async (req, res) => {
+      let query = {};
+      if (req.query.email) {
+        query = {
+          email: req.query.email,
+        };
+      }
+
+      const cursor = orderCollection.find(query);
+      const orders = await cursor.toArray();
+      res.send(orders);
+
+    });
+
+    /**=======================================
+                 delete review api
+      =======================================*/
+    app.delete("/review/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("trying to delete", id);
+      const query = { _id: ObjectId(id) };
+      const result = await reviewCollection.deleteOne(query);
+      console.log(result);
+      res.send(result);
+    });
+  } finally {
   }
 }
 run().catch((err) => console.error(err));
