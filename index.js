@@ -9,10 +9,6 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const hello = {
-  faysal: "hi",
-};
-
 /**=======================================
               mongodb
   ======================================*/
@@ -30,9 +26,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const serviceCollection = client.db("justicialower").collection("services");
-    const reviewCollection = client
-      .db("justicialower")
-      .collection("reviews");
+    const reviewCollection = client.db("justicialower").collection("reviews");
 
     /**=======================================
                   Total service
@@ -71,8 +65,7 @@ async function run() {
       =======================================*/
     app.post("/review", async (req, res) => {
       const user = req.body;
-      console.log(user);
-      const result = await reviewCollection.insertOne(hello);
+      const result = await reviewCollection.insertOne(user);
       res.send(result);
       console.log(result);
     });
@@ -82,25 +75,44 @@ async function run() {
       =======================================*/
 
     app.get("/review", async (req, res) => {
-      const query = {};
-      const cursor = reviewCollection.find(query);
-      const user = await cursor.toArray();
-      res.send(user);
-    });
-
-    // orders api
-    app.get("/orders", async (req, res) => {
       let query = {};
+
       if (req.query.email) {
         query = {
           email: req.query.email,
         };
       }
+      const cursor = reviewCollection.find(query);
+      const review = await cursor.toArray();
+      res.send(review);
+    });
 
-      const cursor = orderCollection.find(query);
-      const orders = await cursor.toArray();
-      res.send(orders);
+    /**=======================================
+                 get unik review api
+      =======================================*/
 
+    app.get("/review/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const service = await serviceCollection.findOne(query);
+      res.send(service);
+    });
+
+    /**=======================================
+                 patch review api
+      =======================================*/
+
+    app.patch("/review/:id", async (req, res) => {
+      const id = req.params.id;
+      const status = req.body.status;
+      const query = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          review: status,
+        },
+      };
+      const result = await orderCollection.updateOne(query, updatedDoc);
+      res.send(result);
     });
 
     /**=======================================
