@@ -94,24 +94,28 @@ async function run() {
     app.get("/review/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
-      const service = await serviceCollection.findOne(query);
+      const service = await reviewCollection.findOne(query);
       res.send(service);
     });
-
     /**=======================================
-                 patch review api
+                 PUT review api
       =======================================*/
-
-    app.patch("/review/:id", async (req, res) => {
+    app.put("/review/:id", async (req, res) => {
       const id = req.params.id;
-      const status = req.body.status;
-      const query = { _id: ObjectId(id) };
-      const updatedDoc = {
+      const filter = { _id: ObjectId(id) };
+      const user = req.body;
+      const option = { upsert: true };
+      console.log(user)
+      const updatedUser = {
         $set: {
-          review: status,
+          review: user.review,
         },
       };
-      const result = await orderCollection.updateOne(query, updatedDoc);
+      const result = await reviewCollection.updateOne(
+        filter,
+        updatedUser,
+        option
+      );
       res.send(result);
     });
 
