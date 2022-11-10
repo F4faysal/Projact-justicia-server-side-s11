@@ -67,6 +67,18 @@ async function run() {
       res.send(result);
       console.log(result)
     });
+
+      /**=======================================
+                 get review api
+      =======================================*/
+
+    app.get("/review", async (req, res) => {
+      const query = {};
+      const cursor = reviewCollection.find(query);
+      const user = await cursor.toArray();
+      res.send(user);
+    });
+
     } finally {
   }
 }
