@@ -38,6 +38,18 @@ async function run() {
       res.send(services);
     });
     /**=======================================
+                  Post service
+      =======================================*/
+  
+    app.post("/service", async (req, res) => {
+      const service = req.body;
+      const services = await serviceCollection.insertOne(service);
+      res.send(services);
+      console.log(service);
+    });
+
+
+    /**=======================================
                     3 service api
       =======================================*/
     app.get("/service/3", async (req, res) => {
